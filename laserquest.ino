@@ -41,7 +41,19 @@ const unsigned long max_runtime = 600000; // 10 minutes
 const unsigned long millis_per_min = 60000;
 
 
-
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  
+  pinMode(pakled0, OUTPUT);
+  pinMode(hitled0, OUTPUT);
+  pinMode(pin_10, OUTPUT);
+  pinMode(pin_start, INPUT); //digital
+  pinMode(pin_stop, INPUT);  //digital
+  pinMode(buzzer, OUTPUT);
+  pak_reset();
+  lcd.begin(16,2);
+}
 
 void pak_reset(){
  
@@ -82,17 +94,7 @@ void displayStats( unsigned long timeleft, int hits){
   lcd.print( hits);
     
 }
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  
-  pinMode(pakled0, OUTPUT);
-  pinMode(hitled0, OUTPUT);
-  pinMode(pin_10, OUTPUT);
-  pinMode(buzzer, OUTPUT);
-  pak_reset();
-  lcd.begin(16,2);
-}
+
 
 void blink_suit() {
   unsigned long now = millis();
@@ -182,8 +184,8 @@ void loop() {
         if (hit_counter >= 10){
           digitalWrite(pin_10, HIGH);
         }
-        suit_start = sensorRead(pin_start);
-        suit_stop = sensorRead(pin_stop);
+        suit_start = digitalRead(pin_start);
+        suit_stop = digitalRead(pin_stop);
         // both pins pressed at same time -> reset
         if (suit_start && suit_stop){
           pak_reset();
