@@ -39,8 +39,8 @@ const int sensor_LDR_front = A0;
 const int sensor_ir_front = A1;
 const int sensor_LDR_back = A2;
 const int sensor_ir_back  = A3;
-const int pin_reset = A4;
-const int pin_on = A5;
+const int pin_start = A4;
+const int pin_stop = A5;
 const unsigned long max_runtime = 600000; // 10 minutes
 //const unsigned long max_runtime=62000; // 1 minute 2 seconds
 const unsigned long millis_per_min = 60000;
@@ -148,10 +148,7 @@ bool sensorRead(int pin){
   return (sensor_value > 155) ? true:false;
 }
 
-bool get_reset(){
-  int sensor_value = analogRead(pin_reset);
-  return (sensor_value  > 155) ? true: false;
-}
+
 void suit_off() {
   digitalWrite(pakled0, LOW);
   digitalWrite(hitled0, LOW);
@@ -163,21 +160,27 @@ void loop() {
   long time_left = max_runtime - time_elapsed;
   bool sensor1 = false;
   bool sensor2 = false;
-  bool reset = false;
   bool suit_on = false;
+  bool suit_start = false;
+  bool suit_stop = false;
   
   if ( suit_on ) {
      if (time_left > 0 && hit_counter < 10) {
-      //sensor1 = sensorRead(sensor_LDR_front);
-      //sensor2 = sensorRead(sensor_LDR_back);
+        sensor1 = sensorRead(sensor_LDR_front);
+        sensor2 = sensorRead(sensor_LDR_back);
         if (sensor1 || sensor2) {
            hit_counter++;
            coolDown();
         }
-        //reset = get_reset();
-        if (reset){
-           pak_reset();
+        suit_start = sensorRead(pin_start);
+        suit_stop = sensorRead(pin_stop);
+        // both pins pressed at same time -> reset
+        if (suit_start && suit_stop){
+          pak_reset();
+        } else if (suit_stop) {
+          suit_on = false;
         }
+       
         displayStats(time_left, hit_counter);
         blink_suit();
      }
@@ -186,7 +189,7 @@ void loop() {
      }
   }
   else {
-    suit_on = sensorRead(pin_on);
+    suit_on = sensorRead(pin_start);
     pak_reset();
   }
 
