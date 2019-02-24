@@ -26,13 +26,8 @@ int index =0;
 int recharge = 1000;
 
 const int pakled0 = 8;
-//const int pakled1 = 9;
-//const int pakled2 = 10;
-//const int pakled3 = 11;
+const int pin_10 = 10;
 const int hitled0 = 7;
-//const int hitled1 = 2;
-//const int hitled2 = 3;
-//const int hitled3 = 4;
 
 const int buzzer  = 9;
 const int sensor_LDR_front = A0;
@@ -55,6 +50,7 @@ void pak_reset(){
   previous = 0L;
   digitalWrite(pakled0, LOW);
   digitalWrite(hitled0, LOW);
+  digitalWrite(pin_10, LOW);
   start_time = millis();
     
 }
@@ -90,6 +86,7 @@ void setup() {
   
   pinMode(pakled0, OUTPUT);
   pinMode(hitled0, OUTPUT);
+  pinMode(pin_10, OUTPUT);
   pak_reset();
   lcd.begin(16,2);
 }
@@ -105,17 +102,10 @@ void blink_suit() {
       switch (index) {
          case 0:
            digitalWrite(pakled0, HIGH);
-           //digitalWrite(pakled1, LOW);
-           //digitalWrite(pakled2, LOW);
-           //digitalWrite(pakled3, LOW);
            break;
          case 1:
            digitalWrite(pakled0, LOW);
-           //digitalWrite(pakled1, HIGH);
-           //digitalWrite(pakled2, LOW);
-           //digitalWrite(pakled3, LOW);
-           break;
- 
+            break;
       }  
       index += 1;
       if (index > 1){
@@ -152,6 +142,7 @@ bool sensorRead(int pin){
 void suit_off() {
   digitalWrite(pakled0, LOW);
   digitalWrite(hitled0, LOW);
+  digitalWrite(pin_10, LOW);
 }
 void loop() {
   // put your main code here, to run repeatedly:
@@ -171,6 +162,9 @@ void loop() {
         if (sensor1 || sensor2) {
            hit_counter++;
            coolDown();
+        }
+        if (hit_counter >= 10){
+          digitalWrite(pin_10, HIGH);
         }
         suit_start = sensorRead(pin_start);
         suit_stop = sensorRead(pin_stop);
