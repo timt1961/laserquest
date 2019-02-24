@@ -177,6 +177,7 @@ void loop() {
         // both pins pressed at same time -> reset
         if (suit_start && suit_stop){
           pak_reset();
+          suit_on = false;
         } else if (suit_stop) {
           suit_on = false;
         }
