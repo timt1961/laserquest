@@ -40,8 +40,9 @@ const int sensor_ir_front = A1;
 const int sensor_LDR_back = A2;
 const int sensor_ir_back  = A3;
 const int pin_reset = A4;
-// const unsigned long max_runtime = 600000; // 10 minutes
-const unsigned long max_runtime=62000; // 1 minute 2 seconds
+const int pin_on = A5;
+const unsigned long max_runtime = 600000; // 10 minutes
+//const unsigned long max_runtime=62000; // 1 minute 2 seconds
 const unsigned long millis_per_min = 60000;
 
 
@@ -53,14 +54,7 @@ void pak_reset(){
   index = 0;
   previous = 0L;
   digitalWrite(pakled0, LOW);
-  //digitalWrite(pakled1, LOW);
-  //digitalWrite(pakled2, LOW);
-  //digitalWrite(pakled3, LOW);
   digitalWrite(hitled0, LOW);
-  //digitalWrite(hitled1, LOW);
-  //digitalWrite(hitled2, LOW);
-  //digitalWrite(hitled3, LOW);
-  
   start_time = millis();
     
 }
@@ -95,13 +89,7 @@ void setup() {
   Serial.begin(9600);
   
   pinMode(pakled0, OUTPUT);
-  //pinMode(pakled1, OUTPUT);
-  //pinMode(pakled2, OUTPUT);
-  //pinMode(pakled3, OUTPUT);  
   pinMode(hitled0, OUTPUT);
-  //pinMode(hitled1, OUTPUT);
-  //pinMode(hitled2, OUTPUT);
-  //pinMode(hitled3, OUTPUT);
   pak_reset();
   lcd.begin(16,2);
 }
@@ -176,27 +164,30 @@ void loop() {
   bool sensor1 = false;
   bool sensor2 = false;
   bool reset = false;
-  char timeleftbuf[32];
-  char timeelapsedbuf[32];
+  bool suit_on = false;
   
-  
-  if (time_left > 0 && hit_counter < 10) {
-    //sensor1 = sensorRead(sensor_LDR_front);
-    //sensor2 = sensorRead(sensor_LDR_back);
-    if (sensor1 || sensor2) {
-       hit_counter++;
-       coolDown();
-    }
-    //reset = get_reset();
-    if (reset){
-       pak_reset();
-    }
-    displayStats(time_left, hit_counter);
-    blink_suit();
-    delay(1000);
+  if ( suit_on ) {
+     if (time_left > 0 && hit_counter < 10) {
+      //sensor1 = sensorRead(sensor_LDR_front);
+      //sensor2 = sensorRead(sensor_LDR_back);
+        if (sensor1 || sensor2) {
+           hit_counter++;
+           coolDown();
+        }
+        //reset = get_reset();
+        if (reset){
+           pak_reset();
+        }
+        displayStats(time_left, hit_counter);
+        blink_suit();
+     }
+     else {
+       suit_off();
+     }
   }
   else {
-    suit_off();
+    suit_on = sensorRead(pin_on);
+    pak_reset();
   }
 
 }
