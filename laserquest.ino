@@ -62,6 +62,7 @@ void displayStats( unsigned long timeleft, int hits){
   unsigned long seconds = timeleft % millis_per_min;
   char secstr[32];
   char minstr[32];
+
   sprintf(secstr, "%02d", seconds/1000);
   sprintf(minstr, "%02d", mins);
   Serial.print(" displayStats: minutes:");
@@ -71,7 +72,7 @@ void displayStats( unsigned long timeleft, int hits){
   
   Serial.print("\n");
  
-  
+  // Print time and hits on first line
   lcd.setCursor(0,0);
   lcd.print( minstr);
   lcd.print(":");
@@ -119,11 +120,17 @@ void blink_suit() {
 void coolDown() {
    // We've been hit: turn off the suit leds
    // and turn on the buzzer
+   // and display hit on second line
+   
    digitalWrite(pakled0, LOW);
    // Display the power UP
    digitalWrite(hitled0, HIGH);
    // Turn on the buzzer, freq = 1000Hz
    tone(buzzer, 1000);
+   // cursor on second line
+   lcd.setCursor(0, 1);
+   lcd.print("Hit!");
+   
    delay( recharge);
    digitalWrite(hitled0, LOW);
    delay(recharge);
@@ -134,8 +141,10 @@ void coolDown() {
    digitalWrite(hitled0, HIGH);
    delay(recharge);
    digitalWrite(hitled0, LOW);
+   // Buzzer off
    noTone(buzzer);
-   
+   // clear LCD second line
+   lcd.print("  ");
 }
 
 bool sensorRead(int pin){
