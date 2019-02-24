@@ -51,6 +51,7 @@ void pak_reset(){
   digitalWrite(pakled0, LOW);
   digitalWrite(hitled0, LOW);
   digitalWrite(pin_10, LOW);
+  noTone(buzzer);
   start_time = millis();
     
 }
@@ -87,6 +88,7 @@ void setup() {
   pinMode(pakled0, OUTPUT);
   pinMode(hitled0, OUTPUT);
   pinMode(pin_10, OUTPUT);
+  pinMode(buzzer, OUTPUT);
   pak_reset();
   lcd.begin(16,2);
 }
@@ -116,9 +118,12 @@ void blink_suit() {
 
 void coolDown() {
    // We've been hit: turn off the suit leds
+   // and turn on the buzzer
    digitalWrite(pakled0, LOW);
    // Display the power UP
    digitalWrite(hitled0, HIGH);
+   // Turn on the buzzer, freq = 1000Hz
+   tone(buzzer, 1000);
    delay( recharge);
    digitalWrite(hitled0, LOW);
    delay(recharge);
@@ -129,6 +134,7 @@ void coolDown() {
    digitalWrite(hitled0, HIGH);
    delay(recharge);
    digitalWrite(hitled0, LOW);
+   noTone(buzzer);
    
 }
 
@@ -143,6 +149,7 @@ void suit_off() {
   digitalWrite(pakled0, LOW);
   digitalWrite(hitled0, LOW);
   digitalWrite(pin_10, LOW);
+  noTone(buzzer);
 }
 void loop() {
   // put your main code here, to run repeatedly:
