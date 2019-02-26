@@ -40,10 +40,13 @@ const unsigned long max_runtime = 600000; // 10 minutes
 //const unsigned long max_runtime=62000; // 1 minute 2 seconds
 const unsigned long millis_per_min = 60000;
 
+bool suit_on = false;
+
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
+  Serial.print("In Setup");
   
   pinMode(pakled0, OUTPUT);
   pinMode(hitled0, OUTPUT);
@@ -99,7 +102,7 @@ void displayStats( unsigned long timeleft, int hits){
 void blink_suit() {
   unsigned long now = millis();
   
-  long elapsed_secs = (now - previous)/1000L;
+  long elapsed_secs = (now - previous)/333L;
   
   if ( elapsed_secs >= 1L) { //make sure a second has passed
       Serial.print("\nblink\n");
@@ -146,20 +149,23 @@ void coolDown() {
    // Buzzer off
    noTone(buzzer);
    // clear LCD second line
-   lcd.print("  ");
+   lcd.setCursor(0, 1);
+   lcd.print("      ");
 }
 
 bool sensorRead(int pin){
   int sensor_value = analogRead(pin);
-
-  return (sensor_value > 155) ? true:false;
+  char sensstr[32];
+  sprintf(sensstr, "sensor %d\n", sensor_value);
+  Serial.print(sensstr);
+  return (sensor_value > 365) ? true:false;
 }
 
 
 void suit_off() {
   digitalWrite(pakled0, LOW);
   digitalWrite(hitled0, LOW);
-  digitalWrite(pin_10, LOW);
+  digitalWrite(pin_10, HIGH);
   noTone(buzzer);
 }
 void loop() {
@@ -169,41 +175,77 @@ void loop() {
   long time_left = max_runtime - time_elapsed;
   bool sensor1 = false;
   bool sensor2 = false;
-  bool suit_on = false;
   bool suit_start = false;
+  int start_val = HIGH;
   bool suit_stop = false;
+  int stop_val = HIGH;
+  
+  char pinstr[32];
   
   if ( suit_on ) {
+    Serial.print("In Suit_on branch true\n");
+    
      if (time_left > 0 && hit_counter < 10) {
+        displayStats(time_left, hit_counter);
+        blink_suit();
         sensor1 = sensorRead(sensor_LDR_front);
         sensor2 = sensorRead(sensor_LDR_back);
         if (sensor1 || sensor2) {
            hit_counter++;
+           displayStats(time_left, hit_counter);
            coolDown();
         }
-        if (hit_counter >= 10){
+        if ((hit_counter >= 10) || (time_left <= 0L)){
           digitalWrite(pin_10, HIGH);
         }
-        suit_start = digitalRead(pin_start);
-        suit_stop = digitalRead(pin_stop);
+        start_val = digitalRead(pin_start);
+ 
+        if (start_val == LOW){
+          suit_start = true;
+        }
+        else{
+          suit_start = false;
+        }
+        stop_val= digitalRead(pin_stop);
+  
+        
+        if (stop_val == LOW){
+          suit_stop = true;
+        }
+        else {
+          suit_stop = false;
+        }
         // both pins pressed at same time -> reset
         if (suit_start && suit_stop){
+          Serial.print("===> Resetting suit\n");
           pak_reset();
+          delay(10000);
           suit_on = false;
         } else if (suit_stop) {
+          Serial.print("======> Stopping suit\n");
           suit_on = false;
         }
        
-        displayStats(time_left, hit_counter);
-        blink_suit();
+
      }
      else {
        suit_off();
      }
   }
   else {
-    suit_on = sensorRead(pin_start);
-    pak_reset();
+    int start_val;
+    Serial.print ("Suit is off, read pin\n");
+    start_val = digitalRead(pin_start);
+    if (start_val == LOW){
+      Serial.print("=======> Starting Suit\n");
+      suit_on = true;
+      pak_reset();
+    }
+    else {
+      Serial.print("Turn suit off\n");
+      suit_on = false;
+    }
+ 
   }
 
 }
